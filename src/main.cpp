@@ -1,32 +1,55 @@
 #include <Arduino.h>
 
   bool Direction = 0, Reset = 0;
-  int Counter, Slots, Pulses = 0 , Resistance , Radiuse;
-  double Voltage, Current, Speed = 0;
-  unsigned long currentTime, lastTime , Interval = ;
-  char directionPin = 13 , counterPin = 12, encoderPin = 8, resetPin = 7, voltagePin = 3;
+  int Counter, Slots, leftPulses = 0 , rightPulses = 0 , Resistance , Radiuse;
+  double Voltage, Current, leftSpeed = 0 , rightSpeed = 0;
+  unsigned long currentTime, lastTime , Interval = 0;
+  char directionPin = 13 , counterPin = 12, leftEncoderPin = 2,rightEncoderPin = 3, resetPin = 7, voltagePin = A0;
 
 void setup() {
   // put your setup code here, to run once:
-  pinMode(directionPin ,INPUT);
-  pinMode(counterPin   ,INPUT);
-  pinMode(encoderPin   ,INPUT);
-  pinMode(resetPin     ,INPUT);
-  pinMode(voltagePin   ,INPUT);
-   
+  pinMode(directionPin     ,INPUT);
+  pinMode(counterPin       ,INPUT);
+  pinMode(leftEncoderPin   ,INPUT);
+  pinMode(rightEncoderPin  ,INPUT);
+  pinMode(resetPin         ,INPUT);
+  pinMode(voltagePin       ,INPUT);
+
+  // enableing Interrupt for Pin
+  attachInterrupt(digitalPinToInterrupt(leftEncoderPin)  , leftISR ,  RISING);
+  attachInterrupt(digitalPinToInterrupt(rightEncoderPin) , rightISR , RISING);
+  
 }
 
-void calcSpeed(){
+void leftISR(){
+    leftPulses++;
+}
+
+void rightISR(){
+    rightPulses++;
+}
+
+void calcSpeedLeft(){
     double Revelution;
     currentTime = millis() - lastTime;
     if(currentTime >= Interval){
-      Revelution = (double)Pulses / Slots;
-      Slots = 0;
-      Speed = Revelution*(2*PI*Radiuse) / currentTime;
+      Revelution = (double)leftPulses / Slots;
+      leftPulses = 0;
+      leftSpeed = Revelution*(2*PI*Radiuse) / currentTime;
       lastTime = currentTime;
     }
 }
 
+void calcSpeedRight(){
+    double Revelution;
+    currentTime = millis() - lastTime;
+    if(currentTime >= Interval){
+      Revelution = (double)rightPulses / Slots;
+      rightPulses = 0;
+      rightSpeed = Revelution*(2*PI*Radiuse) / currentTime;
+      lastTime = currentTime;
+    }
+}
 
 void loop() {
   // put your main code here, to run repeatedly:
@@ -39,17 +62,11 @@ void loop() {
   // the lab button
   Counter  += digitalRead(counterPin);
   
-  // the number of bulses for calculating the speed
-  Pulses   += digitalRead(encoderPin);
-
   // the voltage & current come from the battery
   Voltage   = analogRead(voltagePin);
   Current   = Voltage / Resistance;
 
-  calcSpeed();
-
-
-
-  
+  calcSpeedLeft();
+  calcSpeedRight();
 
 }
