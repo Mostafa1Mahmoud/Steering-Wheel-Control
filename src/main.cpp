@@ -3,26 +3,28 @@
   bool Direction = 0, Reset = 0;
   int Counter, Slots, Pulses = 0 , Resistance , Radiuse;
   double Voltage, Current, Speed = 0;
-  unsigned long time = 0;
-  char directionPin = 13 , counterPin = 12, decoderPin = 8, resetPin = 7, voltagePin = 3;
+  unsigned long currentTime, lastTime , Interval = ;
+  char directionPin = 13 , counterPin = 12, encoderPin = 8, resetPin = 7, voltagePin = 3;
 
 void setup() {
   // put your setup code here, to run once:
   pinMode(directionPin ,INPUT);
   pinMode(counterPin   ,INPUT);
-  pinMode(decoderPin   ,INPUT);
+  pinMode(encoderPin   ,INPUT);
   pinMode(resetPin     ,INPUT);
   pinMode(voltagePin   ,INPUT);
    
 }
 
-double calcSpeed(){
-    if(Pulses == Slots){
-      time = millis() - time;
-      Pulses %= Slots;
-      Speed = (2*PI*Radiuse)/time;
+void calcSpeed(){
+    double Revelution;
+    currentTime = millis() - lastTime;
+    if(currentTime >= Interval){
+      Revelution = (double)Pulses / Slots;
+      Slots = 0;
+      Speed = Revelution*(2*PI*Radiuse) / currentTime;
+      lastTime = currentTime;
     }
-    return Speed;
 }
 
 
@@ -38,7 +40,7 @@ void loop() {
   Counter  += digitalRead(counterPin);
   
   // the number of bulses for calculating the speed
-  Pulses   += digitalRead(decoderPin);
+  Pulses   += digitalRead(encoderPin);
 
   // the voltage & current come from the battery
   Voltage   = analogRead(voltagePin);
