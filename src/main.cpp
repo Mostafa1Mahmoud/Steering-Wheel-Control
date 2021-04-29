@@ -2,7 +2,8 @@
 
   bool Direction = 0, Reset = 0;
   int Counter, Slots, Pulses = 0 , Resistance , Radiuse;
-  double Voltage, Current, Speed = 0, time = 0.0; 
+  double Voltage, Current, Speed = 0;
+  unsigned long time = 0;
   char directionPin = 13 , counterPin = 12, decoderPin = 8, resetPin = 7, voltagePin = 3;
 
 void setup() {
