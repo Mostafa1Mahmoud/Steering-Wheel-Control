@@ -1,8 +1,8 @@
 #include <Arduino.h>
 
   bool Direction = 0, Reset = 0;
-  int Counter, Slots, leftPulses = 0 , rightPulses = 0 , Resistance , Radiuse;
-  double Voltage, Current, leftSpeed = 0 , rightSpeed = 0;
+  int Counter, Slots, leftPulses = 0 , rightPulses = 0 , Resistance , Radiuse , totalLaps;
+  double Voltage, Current, leftSpeed = 0 , rightSpeed = 0,Time = 0,usedCurrent = 0;
   unsigned long currentTime, lastTime , Interval = 0;
   char directionPin = 13 , counterPin = 12, leftEncoderPin = 2,rightEncoderPin = 3, resetPin = 7, voltagePin = A0;
 
@@ -56,15 +56,23 @@ void loop() {
   // the Direction of the wheel
   Direction = digitalRead(directionPin);
   
-  // the reset button
-  Reset     = digitalRead(resetPin);
-  
-  // the lab button
-  Counter  += digitalRead(counterPin);
-  
+  // Handling The reset & Laps Buttons
+  if(digitalRead(resetPin) && digitalRead(counterPin)){
+    totalLaps = Counter;
+  }
+  else if(digitalRead(resetPin) && !digitalRead(counterPin)){
+    Counter = 0;
+  }
+  else if(!digitalRead(resetPin) && digitalRead(counterPin)){
+    Counter++;
+  }
+
   // the voltage & current come from the battery
   Voltage   = analogRead(voltagePin);
   Current   = Voltage / Resistance;
+
+  Time = millis() - Time;
+  usedCurrent = Time * Current;
 
   calcSpeedLeft();
   calcSpeedRight();
