@@ -2,8 +2,8 @@
 
   bool Direction = 0, Reset = 0;
   int Counter, Slots, leftPulses = 0 , rightPulses = 0 , Resistance , Radiuse , totalLaps;
-  double Voltage, Current, leftSpeed = 0 , rightSpeed = 0,Time = 0,usedCurrent = 0;
-  unsigned long currentTime, lastTime , Interval = 0;
+  double Voltage, Current, leftSpeed = 0.0 , rightSpeed = 0.0,Time = 0.0,usedCurrent = 0.0, SOC = 0.0, TotalCharge = 0;
+  unsigned long currentTime, lastTime , Interval = 0, socInterval = 1, socCurrentTime = 0, socLastTime = 0;
   char directionPin = 13 , counterPin = 12, leftEncoderPin = 2,rightEncoderPin = 3, resetPin = 7, voltagePin = A0;
 
 void setup() {
@@ -19,6 +19,15 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(leftEncoderPin)  , leftISR ,  RISING);
   attachInterrupt(digitalPinToInterrupt(rightEncoderPin) , rightISR , RISING);
   
+}
+
+double battaryCounter(){
+  socCurrentTime = millis() - socLastTime;
+  if(socCurrentTime >= socInterval){
+    SOC +=  Current*.001;
+    socLastTime = socCurrentTime;
+  }
+  return ((TotalCharge - SOC)/TotalCharge) * 100;
 }
 
 void leftISR(){
